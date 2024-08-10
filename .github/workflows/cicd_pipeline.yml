@@ -33,9 +33,13 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/real-madrid-results:latest
           push: true
 
+  create-artifact:
+    needs: [build]
+    uses: nikolhodos/integration-workflow/.github/workflows/create-artifact.yml@main
+
   results:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [create-artifact]
     env:
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
     steps:
@@ -54,3 +58,42 @@ jobs:
 
       - name: Run main.py
         run: python app/main.py
+
+  development:
+    environment: Development
+    needs: [results]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "- Auto-deploy the artifact to the development environment"
+
+  staging:
+    environment: Staging
+    needs: [development]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "After development environment is deployed..."
+          echo "- Auto-deploy the artifact to the staging environment"
+
+  test-staging:
+    needs: staging
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "- Test the staging environment"
+
+  production:
+    environment: Production
+    needs: [test-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "After staging environment is deployed..."
+          echo "and after the staging tests have passed..."
+          echo "- Deploy the artifact to the production environment"
+
+  test-production:
+    needs: [production]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "- Test the artifact in the production environment"
+      - run: echo "# Everything completed successfully!" >> $GITHUB_STEP_SUMMARY
