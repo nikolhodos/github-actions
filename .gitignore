@@ -1,0 +1,24 @@
+# Exclude the .git directory
+.git/
+
+# Exclude the .github directory unless needed for deployment
+.github/
+
+# Exclude Python cache files
+__pycache__/
+*.pyc
+
+# Exclude virtual environments and environment variable files
+venv/
+.env
+
+# Exclude build files
+dist/
+build/
+
+# Exclude log files
+*.log
+
+# Exclude OS-specific files
+.DS_Store
+Thumbs.db
